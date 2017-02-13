@@ -153,8 +153,9 @@
 
  <middle>
    <section title="Introduction">
-     <t>EaaSP enables communication between a cryptographic module that is embedded inside of a device or otherwise running on a platform accessible via computer network, using standard network communication interfaces and protocols.  This communication protocol can also be used to obtain random data from a remote server for local cyptographic key generation on the client.
-This document describes how EaaSP is structured with respect to the client-server model, the messaging protocol, optional features and flows.</t>
+     <t>EaaSP enables communication between a cryptographic module that is embedded inside of a device or otherwise running on a platform accessible via computer network, 
+     using standard network communication interfaces and protocols.  This communication protocol can also be used to obtain random data from a remote server for local 
+     cyptographic key generation on the client. This document describes how EaaSP is structured with respect to the client-server model, the messaging protocol, optional features and flows.</t>
 
      <section title="Requirements Language">
        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -164,23 +165,25 @@ This document describes how EaaSP is structured with respect to the client-serve
    </section>
 
    <section anchor="caps_reg" title="Overview">
-	    <t>ACVP has the following goals:</t>
+	    <t>EaaSP has the following goals:</t>
 	    <t><list style="symbols">
-<t>	To work in situations where the testing system is remote from the cryptographic module, e.g. running as a process on a separate device.</t>
-<t>	To enable automated testing that can take place with a minimum of human interaction.</t>
-<t>	To enable the testing system to discover the capabilities of the module being tested; that is, the particular algorithms and parameters that the module supports.</t>
-<t>	To provide extensibility that can be used to introduce tests for new algorithms, and new tests for existing algorithms.</t>
-<t>	To be compatible with emerging automated validation systems wherever possible, especially the FIPS-140 Cryptographic Algorithm Validation Program.</t>
-<t>	To provide a standard communication method so that vendors can utilize the same testing service for FIPS-140, 3rd party crypto verification and product FCS readiness testing.</t>
+<t>	To work in situations where the client system has limited true random data available for key generation  but is connected to a network , such as many IoT devices, embedded devices. etc. </t>
+<t>	To enable generation of local cryptographic keys through appropriate mixing of local and remote random data..</t>
+<t>	To provide extensibility that can be used to introduce new features to improve security and performance.</t>
+<t>	To provide a standard communication method so that network devices can reliably obtain random data to strengthen the security of cryptographic keys. </t>
 	   </list></t>
 
-<t>ACVP defines how to communicate a request (to execute a cryptographic operation) to a cryptographic module, and how to communicate the corresponding response (containing the output of that operation) back to a testing system.  It defines a transport (based on HTTP or HTTPS), an encoding and message format (which is negotiated), and a set of message exchanges.  Each vector test set corresponds to a single message exchange driven from the client associated with the module under test.
-ACVP does not define the cryptographic algorithms, nor does it detail the precise conditions for a response to be acceptable.  Instead, it references existing specifications for those algorithms, and defines a mapping between the data on the wire and the algorithm testing specification.
-ACVP does not define detailed conformance criteria, such as those in FIPS-140.  Instead, it aims to be independent of particular conformance criteria, so that it can be used in multiple domains with different (even potentially conflicting) conformance criteria.
-ACVP does not define an interface that can be used to manage or control a cryptographic module.</t>
+<t>EaaSP defines how to communicate a request to a remote server for obtaining random data and how to communicate the corresponding response (containing the requested data) back to client.  It defines a transport (based on HTTP), 
+an encoding and message format (which is negotiated), and a set of message exchanges.  Each data item corresponds to a single message exchange driven from the client .
+EaaSP does not define key generation algorithms, nor does it detail the precise conditions for a response to be acceptable.  Instead, it references existing specifications for those algorithms, 
+and defines a mapping between the data on the wire and the algorithms that may consume it.
+EaaSP does not define detailed conformance criteria, such as those in FIPS-140.  Instead, it aims to be independent of particular conformance criteria, so that it can be used in multiple domains 
+with different (even potentially conflicting) conformance criteria.
+EaaSP does not define an interface that can be used to manage or control a client.</t>
         <section title="Audience">
 	<t>This document is written to address multiple audiences:</t>
 	    <t><list style="symbols">
+<t>	Crypto module developers who need to provide assurance for cryptographic key strength</t>
 <t>	Crypto module developers who require validation testing</t>
 <t>	Crypto validation organizations who will perform validation testing</t>
 <t>	Crypto module customers that desire validation testing results or verifiable artifacts of testing</t>
@@ -192,13 +195,13 @@ ACVP does not define an interface that can be used to manage or control a crypto
 The following functions are outside the scope of this document:</t>
 	    <t><list style="symbols">
 <t>	The API to the cryptographic module</t>
-<t>	How the KATs are generated</t>
-<t>	How the results/artifacts are stored or managed</t>
+<t>	How the cryptographic keys are generated</t>
+<t>	How the random data obtained through the protocol are stored or managed</t>
 <t>	Authentication used</t>
 <t>	Scalability</t>
 <t>	Management interface</t>
 	   </list></t>
-	 <t>With that in mind there are several expectations when building a server used as a validation authority.  A validation authority shall use HTTPS, TLS 1.2 or greater and mutual authentication. Therefore a client that expects to be used with a validation authority shall have the same requirements.  A server, proxy or client developed for the purposes of internal organizational testing only may chose not to include some of those features.</t>
+	 <t>With that in mind there are several expectations when building a EaaS server used as a reputable source of randomness on the net. TBD.</t>
 	 </section>
 
         <section title="Terminology">
@@ -354,12 +357,11 @@ The following functions are outside the scope of this document:</t>
      </section>
 
        <section title="Security">
-           <t>It is recommended that HTTPS is used in order to enforce a secure communication method.  Not all environments will have TLS so HTTP with some level of authentication may be the only option.</t>
+           <t>TBD</t>
        </section>
 
        <section title="Authentication">
-           <t>It is recommended that an authentication scheme be used.  Depending on the target environment that can be as weak as basic HTTP authentication or as strong as TLS mutual certificate authentication. Definition of an authentication scheme will not be discussed here, but should be agreed upon between the client and server owning entities including the servers owned by the validation authorities. 
-For the purposes of the message flow examples, no authentication will be used.</t>
+           <t>TBD</t>
        </section>
 
 	<section title="Traceability">
@@ -369,8 +371,9 @@ For the purposes of the message flow examples, no authentication will be used.</
 	<section title="Encoding">
 	    <t>The encoding used for the request/response messaging will be JSON. The data will be identified by:
 Content-type: application/json
-In order to allow environment specific extensions to a particular version of the ACV protocol, a top-level JSON keyword, extensions will be used to extend the OE description and/or the capabilities.  Extensions may be ignored by the ACV server.
-Vector and vector response data will be JSON encoded.</t>
+In order to allow environment specific extensions to a particular version of the EaaS protocol, a top-level JSON keyword, extensions will be used to 
+extend the OE description and/or the capabilities.  Extensions may be ignored by the EaaS server.
+All data will be JSON encoded.</t>
        </section>
 
 	<section title="Versioning">
@@ -380,14 +383,11 @@ A server may accept a down-level version from the client if it can process at a 
 
      <section title="Messaging">
 
-	<section title="Product Registration/Capabilities Exchange">
-	  <t>The product registration message will include many of the normal cryptographic algorithm identification line items that are found when filling out a testing form. This pre-test message will carry the Company name, primary contact (OE information) as well as a detailed list of the supported cryptographic algorithms to be tested during a session.  The server will return the vector test list to the client.  It will consist of a list of vector set IDs (vsId) each of which represent a set of test vectors which can be used to request the test vectors at a later time.</t>
+	<section title="Data Request/Capabilities Exchange">
+	  <t>TBD</t>
 
        </section>
 
-       <section title="KAT Exchange">
-         <t>The KAT exchange consists of the ACV client requesting a particular set of vectors selected from the vector test list.  The server responds with the test vectors.  Once the client has run the vectors the response data will be returned to the server for processing.  The client will repeat this process until all of the tests in the session test list have been processed.  The client may request results from the server at any time, however if test sets have not been completed the overall status will be incomplete.</t>
-       </section>
      </section>
 
      <section title="Message Formats">
@@ -458,18 +458,18 @@ each message.
      </section>
 
 
-     <section anchor="reg_capex" title="Product Registration with Capabilities">
-     <t>POST the registration to the server consisting of the ACVP version, Operating Environment (OE), vector encoding, capabilities and any extensions. In addition there are a few parameters that specify session specific information:</t>
+     <section anchor="reg_capex" title="Data Request with Capabilities">
+     <t>POST the registration to the server consisting of the EaaSP version, Operating Environment (OE), encoding, capabilities and any extensions. 
+     In addition there are a few parameters that specify session specific information:</t>
 
      <t><list style="symbols">
 
-     <t>certificateRequest - If an algorithm certificate is not desired for this registration populate the field "certificateRequest"  with "no", otherwise "yes".</t> 
-     <t>responseRequest - If this vector session is for the purposes of testing the client or DUT prior to a certificate request and desires the responses to the vectors as well, indicate with "yes", otherwise omit the keyword or indicate with "no"</t>
-     <t>production - If this is a production environment indicate so with "yes", otherwise omit this keyword or indicate with "no".  A production environment may not be able to support intermediate value tests and therefore those tests will be excluded.</t>
-     <t>encryptAtRest - The client may request the server to encrypt all data at rest by registering "encryptAtRest" with "yes". Omitting the "encryptAtRest" field or registering with "no" will indicate to the server that no encryption is require for the data at rest.</t>
+     <t>TBDparam1 - .</t> 
+     <t>TBDparam2 - </t>
+     <t>TBDparam3 - </t>
+     <t>TBDparam4 - </t>
 	   </list></t> 
 
-<t>Note that when a certificate request is made production and responseRequest shall be omitted or set to "no". Conversely if no certificate is requested, the operationalEnvironment section may be omitted.</t>
 
 
 
@@ -796,16 +796,15 @@ Content-Length: <length of results>
    </section>
 
    <section title="Error Codes">
-   <t>Errors will follow HTTP[S] numbering scheme.  In addition errors as well as 200 messages may carry JSON encoded information that describes in detail the error and any associated troubleshooting information.  A non-exhaustive list of JSON encoded error messages are in Appendix 2.</t>
+   <t>Errors will follow HTTP numbering scheme.  In addition errors as well as 200 messages may carry JSON encoded information that describes in detail the error and any associated troubleshooting information.  A non-exhaustive list of JSON encoded error messages are in Appendix 2.</t>
    </section>
 
    <section title="Other Considerations">
-   <t>When an ACVP client is attached to a cryptographic module that is in use, access to ACVP MUST be controlled so that only an administrator or other authorized user can send and receive ACVP messages.  This is because an attacker that has access to ACVP can potentially use it to probe for weaknesses in the cryptographic module.</t>
+   <t>TBD</t>
    </section>
 
    <section anchor="Acknowledgements" title="Acknowledgements">
-     <t>Original ACVP created by David McGrew, Bill Hudson and 
-        Anthony Grieco of Cisco Systems.</t>
+     <t>Original EaaS concept and related prototype created by Apostol Vassilev, NIST.</t>
    </section>
 
    <!-- Possibly a 'Contributors' section ... -->
@@ -854,7 +853,7 @@ plain text length - ptLen
 
 <t>
 {
-"acvVersion" : "0.2",
+"acvVersion" : "0.1",
 "results" : {
 "disposition" : "incomplete",
 } 

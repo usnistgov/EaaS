@@ -392,11 +392,10 @@
 <link href="#rfc.section.8" rel="Chapter" title="8 Encoding"/>
 <link href="#rfc.section.9" rel="Chapter" title="9 Versioning"/>
 <link href="#rfc.section.10" rel="Chapter" title="10 Messaging"/>
-<link href="#rfc.section.10.1" rel="Chapter" title="10.1 Product Registration/Capabilities Exchange"/>
-<link href="#rfc.section.10.2" rel="Chapter" title="10.2 KAT Exchange"/>
+<link href="#rfc.section.10.1" rel="Chapter" title="10.1 Data Request/Capabilities Exchange"/>
 <link href="#rfc.section.11" rel="Chapter" title="11 Message Formats"/>
 <link href="#rfc.section.11.1" rel="Chapter" title="11.1 Establish Connection HTTPS GET/200 OK"/>
-<link href="#rfc.section.11.2" rel="Chapter" title="11.2 Product Registration with Capabilities"/>
+<link href="#rfc.section.11.2" rel="Chapter" title="11.2 Data Request with Capabilities"/>
 <link href="#rfc.section.11.3" rel="Chapter" title="11.3 Vector Set Download Request"/>
 <link href="#rfc.section.11.4" rel="Chapter" title="11.4 Test Results Request"/>
 <link href="#rfc.section.11.5" rel="Chapter" title="11.5 Optional Flows"/>
@@ -499,11 +498,10 @@
 <li>8.   <a href="#rfc.section.8">Encoding</a></li>
 <li>9.   <a href="#rfc.section.9">Versioning</a></li>
 <li>10.   <a href="#rfc.section.10">Messaging</a></li>
-<ul><li>10.1.   <a href="#rfc.section.10.1">Product Registration/Capabilities Exchange</a></li>
-<li>10.2.   <a href="#rfc.section.10.2">KAT Exchange</a></li>
+<ul><li>10.1.   <a href="#rfc.section.10.1">Data Request/Capabilities Exchange</a></li>
 </ul><li>11.   <a href="#rfc.section.11">Message Formats</a></li>
 <ul><li>11.1.   <a href="#rfc.section.11.1">Establish Connection HTTPS GET/200 OK</a></li>
-<li>11.2.   <a href="#rfc.section.11.2">Product Registration with Capabilities</a></li>
+<li>11.2.   <a href="#rfc.section.11.2">Data Request with Capabilities</a></li>
 <li>11.3.   <a href="#rfc.section.11.3">Vector Set Download Request</a></li>
 <li>11.4.   <a href="#rfc.section.11.4">Test Results Request</a></li>
 <li>11.5.   <a href="#rfc.section.11.5">Optional Flows</a></li>
@@ -521,27 +519,26 @@
   </ul>
 
   <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> Introduction</h1>
-<p id="rfc.section.1.p.1">EaaSP enables communication between a cryptographic module that is embedded inside of a device or otherwise running on a platform accessible via computer network, using standard network communication interfaces and protocols.  This communication protocol can also be used to obtain random data from a remote server for local cyptographic key generation on the client.  This document describes how EaaSP is structured with respect to the client-server model, the messaging protocol, optional features and flows.</p>
+<p id="rfc.section.1.p.1">EaaSP enables communication between a cryptographic module that is embedded inside of a device or otherwise running on a platform accessible via computer network, using standard network communication interfaces and protocols.  This communication protocol can also be used to obtain random data from a remote server for local cyptographic key generation on the client. This document describes how EaaSP is structured with respect to the client-server model, the messaging protocol, optional features and flows.</p>
 <h1 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a> Requirements Language</h1>
 <p id="rfc.section.1.1.p.1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <a href="#RFC2119">RFC 2119</a> <cite title="NONE">[RFC2119]</cite>.</p>
 <h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#caps_reg" id="caps_reg">Overview</a></h1>
-<p id="rfc.section.2.p.1">ACVP has the following goals:</p>
+<p id="rfc.section.2.p.1">EaaSP has the following goals:</p>
 <p/>
 
 <ul>
-  <li>To work in situations where the testing system is remote from the cryptographic module, e.g. running as a process on a separate device.</li>
-  <li>To enable automated testing that can take place with a minimum of human interaction.</li>
-  <li>To enable the testing system to discover the capabilities of the module being tested; that is, the particular algorithms and parameters that the module supports.</li>
-  <li>To provide extensibility that can be used to introduce tests for new algorithms, and new tests for existing algorithms.</li>
-  <li>To be compatible with emerging automated validation systems wherever possible, especially the FIPS-140 Cryptographic Algorithm Validation Program.</li>
-  <li>To provide a standard communication method so that vendors can utilize the same testing service for FIPS-140, 3rd party crypto verification and product FCS readiness testing.</li>
+  <li>To work in situations where the client system has limited true random data available for key generation  but is connected to a network , such as many IoT devices, embedded devices. etc. </li>
+  <li>To enable generation of local cryptographic keys through appropriate mixing of local and remote random data..</li>
+  <li>To provide extensibility that can be used to introduce new features to improve security and performance.</li>
+  <li>To provide a standard communication method so that network devices can reliably obtain random data to strengthen the security of cryptographic keys. </li>
 </ul>
-<p id="rfc.section.2.p.3">ACVP defines how to communicate a request (to execute a cryptographic operation) to a cryptographic module, and how to communicate the corresponding response (containing the output of that operation) back to a testing system.  It defines a transport (based on HTTP or HTTPS), an encoding and message format (which is negotiated), and a set of message exchanges.  Each vector test set corresponds to a single message exchange driven from the client associated with the module under test.  ACVP does not define the cryptographic algorithms, nor does it detail the precise conditions for a response to be acceptable.  Instead, it references existing specifications for those algorithms, and defines a mapping between the data on the wire and the algorithm testing specification.  ACVP does not define detailed conformance criteria, such as those in FIPS-140.  Instead, it aims to be independent of particular conformance criteria, so that it can be used in multiple domains with different (even potentially conflicting) conformance criteria.  ACVP does not define an interface that can be used to manage or control a cryptographic module.</p>
+<p id="rfc.section.2.p.3">EaaSP defines how to communicate a request to a remote server for obtaining random data and how to communicate the corresponding response (containing the requested data) back to client.  It defines a transport (based on HTTP), an encoding and message format (which is negotiated), and a set of message exchanges.  Each data item corresponds to a single message exchange driven from the client .  EaaSP does not define key generation algorithms, nor does it detail the precise conditions for a response to be acceptable.  Instead, it references existing specifications for those algorithms, and defines a mapping between the data on the wire and the algorithms that may consume it.  EaaSP does not define detailed conformance criteria, such as those in FIPS-140.  Instead, it aims to be independent of particular conformance criteria, so that it can be used in multiple domains with different (even potentially conflicting) conformance criteria.  EaaSP does not define an interface that can be used to manage or control a client.</p>
 <h1 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a> Audience</h1>
 <p id="rfc.section.2.1.p.1">This document is written to address multiple audiences:</p>
 <p/>
 
 <ul>
+  <li>Crypto module developers who need to provide assurance for cryptographic key strength</li>
   <li>Crypto module developers who require validation testing</li>
   <li>Crypto validation organizations who will perform validation testing</li>
   <li>Crypto module customers that desire validation testing results or verifiable artifacts of testing</li>
@@ -552,13 +549,13 @@
 
 <ul>
   <li>The API to the cryptographic module</li>
-  <li>How the KATs are generated</li>
-  <li>How the results/artifacts are stored or managed</li>
+  <li>How the cryptographic keys are generated</li>
+  <li>How the random data obtained through the protocol are stored or managed</li>
   <li>Authentication used</li>
   <li>Scalability</li>
   <li>Management interface</li>
 </ul>
-<p id="rfc.section.2.2.p.3">With that in mind there are several expectations when building a server used as a validation authority.  A validation authority shall use HTTPS, TLS 1.2 or greater and mutual authentication. Therefore a client that expects to be used with a validation authority shall have the same requirements.  A server, proxy or client developed for the purposes of internal organizational testing only may chose not to include some of those features.</p>
+<p id="rfc.section.2.2.p.3">With that in mind there are several expectations when building a EaaS server used as a reputable source of randomness on the net. TBD.</p>
 <h1 id="rfc.section.2.3"><a href="#rfc.section.2.3">2.3.</a> Terminology</h1>
 <p id="rfc.section.2.3.p.1">TBD </p>
 <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> Architecture</h1>
@@ -714,20 +711,18 @@
 <p id="rfc.section.4.2.p.4">Likewise, to request a specific vector set from the server the ACVP client would use the following request-line:</p>
 <p id="rfc.section.4.2.p.5">GET /validation/acvp/vectors?vsId=1 HTTP/1.1</p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> Security</h1>
-<p id="rfc.section.5.p.1">It is recommended that HTTPS is used in order to enforce a secure communication method.  Not all environments will have TLS so HTTP with some level of authentication may be the only option.</p>
+<p id="rfc.section.5.p.1">TBD</p>
 <h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> Authentication</h1>
-<p id="rfc.section.6.p.1">It is recommended that an authentication scheme be used.  Depending on the target environment that can be as weak as basic HTTP authentication or as strong as TLS mutual certificate authentication. Definition of an authentication scheme will not be discussed here, but should be agreed upon between the client and server owning entities including the servers owned by the validation authorities.  For the purposes of the message flow examples, no authentication will be used.</p>
+<p id="rfc.section.6.p.1">TBD</p>
 <h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> Traceability</h1>
 <p id="rfc.section.7.p.1">TBD</p>
 <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> Encoding</h1>
-<p id="rfc.section.8.p.1">The encoding used for the request/response messaging will be JSON. The data will be identified by: Content-type: application/json In order to allow environment specific extensions to a particular version of the ACV protocol, a top-level JSON keyword, extensions will be used to extend the OE description and/or the capabilities.  Extensions may be ignored by the ACV server.  Vector and vector response data will be JSON encoded.</p>
+<p id="rfc.section.8.p.1">The encoding used for the request/response messaging will be JSON. The data will be identified by: Content-type: application/json In order to allow environment specific extensions to a particular version of the EaaS protocol, a top-level JSON keyword, extensions will be used to extend the OE description and/or the capabilities.  Extensions may be ignored by the EaaS server.  All data will be JSON encoded.</p>
 <h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> Versioning</h1>
 <p id="rfc.section.9.p.1">The version of the ACVP protocol will be carried with each message and will contain a simple major.minor format.  Major version changes will not be backward compatible, however additions and enhancements that do not disrupt compatibility will be indicated with a minor version change.  A server may accept a down-level version from the client if it can process at a lower level.  If not, it will reject the session.  All subsequent messages will carry the negotiated version value.</p>
 <h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> Messaging</h1>
-<h1 id="rfc.section.10.1"><a href="#rfc.section.10.1">10.1.</a> Product Registration/Capabilities Exchange</h1>
-<p id="rfc.section.10.1.p.1">The product registration message will include many of the normal cryptographic algorithm identification line items that are found when filling out a testing form. This pre-test message will carry the Company name, primary contact (OE information) as well as a detailed list of the supported cryptographic algorithms to be tested during a session.  The server will return the vector test list to the client.  It will consist of a list of vector set IDs (vsId) each of which represent a set of test vectors which can be used to request the test vectors at a later time.</p>
-<h1 id="rfc.section.10.2"><a href="#rfc.section.10.2">10.2.</a> KAT Exchange</h1>
-<p id="rfc.section.10.2.p.1">The KAT exchange consists of the ACV client requesting a particular set of vectors selected from the vector test list.  The server responds with the test vectors.  Once the client has run the vectors the response data will be returned to the server for processing.  The client will repeat this process until all of the tests in the session test list have been processed.  The client may request results from the server at any time, however if test sets have not been completed the overall status will be incomplete.</p>
+<h1 id="rfc.section.10.1"><a href="#rfc.section.10.1">10.1.</a> Data Request/Capabilities Exchange</h1>
+<p id="rfc.section.10.1.p.1">TBD</p>
 <h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a> Message Formats</h1>
 <p id="rfc.section.11.p.1">Servers may require a contextual path in the URI prior to the service section and clients/proxies must be able to support it.</p>
 <p id="rfc.section.11.p.2">Unique variable definitions to identify the vector set, device and session include:</p>
@@ -785,17 +780,16 @@ each message.
            </pre>
 <p class="figure">Figure 6</p>
 <p id="rfc.section.11.1.p.2">The authentication mechanism will be defined by the server.</p>
-<h1 id="rfc.section.11.2"><a href="#rfc.section.11.2">11.2.</a> <a href="#reg_capex" id="reg_capex">Product Registration with Capabilities</a></h1>
-<p id="rfc.section.11.2.p.1">POST the registration to the server consisting of the ACVP version, Operating Environment (OE), vector encoding, capabilities and any extensions. In addition there are a few parameters that specify session specific information:</p>
+<h1 id="rfc.section.11.2"><a href="#rfc.section.11.2">11.2.</a> <a href="#reg_capex" id="reg_capex">Data Request with Capabilities</a></h1>
+<p id="rfc.section.11.2.p.1">POST the registration to the server consisting of the EaaSP version, Operating Environment (OE), encoding, capabilities and any extensions.  In addition there are a few parameters that specify session specific information:</p>
 <p/>
 
 <ul>
-  <li>certificateRequest - If an algorithm certificate is not desired for this registration populate the field "certificateRequest"  with "no", otherwise "yes".</li>
-  <li>responseRequest - If this vector session is for the purposes of testing the client or DUT prior to a certificate request and desires the responses to the vectors as well, indicate with "yes", otherwise omit the keyword or indicate with "no"</li>
-  <li>production - If this is a production environment indicate so with "yes", otherwise omit this keyword or indicate with "no".  A production environment may not be able to support intermediate value tests and therefore those tests will be excluded.</li>
-  <li>encryptAtRest - The client may request the server to encrypt all data at rest by registering "encryptAtRest" with "yes". Omitting the "encryptAtRest" field or registering with "no" will indicate to the server that no encryption is require for the data at rest.</li>
+  <li>TBDparam1 - .</li>
+  <li>TBDparam2 - </li>
+  <li>TBDparam3 - </li>
+  <li>TBDparam4 - </li>
 </ul>
-<p id="rfc.section.11.2.p.3">Note that when a certificate request is made production and responseRequest shall be omitted or set to "no". Conversely if no certificate is requested, the operationalEnvironment section may be omitted.</p>
 <div id="rfc.figure.7"/>
 <div id="xml_json3"/>
 <pre>
@@ -860,7 +854,7 @@ Accept:
 }
            </pre>
 <p class="figure">Figure 7</p>
-<p id="rfc.section.11.2.p.4">Successful response from server is 200 OK and a set of vector set identifiers.  The extensions section is optional and can be implementation specific for value add. Follow on versions could include protocol information.</p>
+<p id="rfc.section.11.2.p.3">Successful response from server is 200 OK and a set of vector set identifiers.  The extensions section is optional and can be implementation specific for value add. Follow on versions could include protocol information.</p>
 <div id="rfc.figure.8"/>
 <div id="xml_json4"/>
 <pre>
@@ -1057,11 +1051,11 @@ Content-Length: &lt;length of results&gt;
 <h1 id="rfc.section.12.1"><a href="#rfc.section.12.1">12.1.</a> Resending test responses</h1>
 <p id="rfc.section.12.1.p.1">When one or more test cases fails, the client will need to correct the issue in the crypto module and send the responses again.  The resending of responses for failed test cases will occur for an entire vector set.  Therefore, even if only a single test case in the vector set failed, the client will need to download, process, and upload responses to the server for the entire vector set (presumably after the problem has been corrected in the DUT).  The resending of vector set responses must occur prior to expiry.  </p>
 <h1 id="rfc.section.13"><a href="#rfc.section.13">13.</a> Error Codes</h1>
-<p id="rfc.section.13.p.1">Errors will follow HTTP[S] numbering scheme.  In addition errors as well as 200 messages may carry JSON encoded information that describes in detail the error and any associated troubleshooting information.  A non-exhaustive list of JSON encoded error messages are in Appendix 2.</p>
+<p id="rfc.section.13.p.1">Errors will follow HTTP numbering scheme.  In addition errors as well as 200 messages may carry JSON encoded information that describes in detail the error and any associated troubleshooting information.  A non-exhaustive list of JSON encoded error messages are in Appendix 2.</p>
 <h1 id="rfc.section.14"><a href="#rfc.section.14">14.</a> Other Considerations</h1>
-<p id="rfc.section.14.p.1">When an ACVP client is attached to a cryptographic module that is in use, access to ACVP MUST be controlled so that only an administrator or other authorized user can send and receive ACVP messages.  This is because an attacker that has access to ACVP can potentially use it to probe for weaknesses in the cryptographic module.</p>
+<p id="rfc.section.14.p.1">TBD</p>
 <h1 id="rfc.section.15"><a href="#rfc.section.15">15.</a> <a href="#Acknowledgements" id="Acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.15.p.1">Original ACVP created by David McGrew, Bill Hudson and Anthony Grieco of Cisco Systems.</p>
+<p id="rfc.section.15.p.1">Original EaaS concept and related prototype created by Apostol Vassilev, NIST.</p>
 <h1 id="rfc.section.16"><a href="#rfc.section.16">16.</a> <a href="#IANA" id="IANA">IANA Considerations</a></h1>
 <p id="rfc.section.16.p.1">This memo includes no request to IANA.</p>
 <h1 id="rfc.references"><a href="#rfc.references">17.</a> Normative References</h1>
@@ -1079,7 +1073,7 @@ Content-Length: &lt;length of results&gt;
 <p id="rfc.section.A.p.1">All JSON keywords shall use lower camelCase format with no underscores or hyphens and use the following characters only a-z, A-Z, 0-9. Keywords shall abbreviate common words and phrases wherever possible for brevity.</p>
 <p id="rfc.section.A.p.2">For example: password length - pwLen plain text length - ptLen </p>
 <p id="rfc.section.A.p.3">Keywords should be chosen such that they are informative and brief, for example: </p>
-<p id="rfc.section.A.p.4">{ "acvVersion" : "0.2", "results" : { "disposition" : "incomplete", } </p>
+<p id="rfc.section.A.p.4">{ "acvVersion" : "0.1", "results" : { "disposition" : "incomplete", } </p>
 <p id="rfc.section.A.p.5">Metadata assigned to the keyword may use any format which best reflects the information being represented including hyphens, underscores alternating case, numbers, etc. However, brevity should be a major consideration, for example:</p>
 <p id="rfc.section.A.p.6">"algorithms" : [ { "algorithm" : "AES-GCM", "mode" : "modes", "ivGen" : "internal", "ivGenMode" : "8.2.1", } All metadata representing strings or big numbers shall use double quotes at both ends.  Big numbers require conversion from strings to whatever format is used by the DUT.  Numerical values of integer size or with decimal points may use quotations if those values are generally used as a string, for example the acvVersion would generally be used in displaying information not in any mathematical operations.  Something like keyLen or ptLen values would be better used without quotes to avoid having to convert the string to an integer for use in the code.  </p>
 <h1 id="rfc.authors">

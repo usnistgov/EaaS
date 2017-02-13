@@ -63,10 +63,10 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
      1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
    2.  Overview  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  Audience  . . . . . . . . . . . . . . . . . . . . . . . .   4
+     2.1.  Audience  . . . . . . . . . . . . . . . . . . . . . . . .   3
      2.2.  Goals . . . . . . . . . . . . . . . . . . . . . . . . . .   4
      2.3.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   4
-   3.  Architecture  . . . . . . . . . . . . . . . . . . . . . . . .   5
+   3.  Architecture  . . . . . . . . . . . . . . . . . . . . . . . .   4
      3.1.  Server/Client Architecture  . . . . . . . . . . . . . . .   5
      3.2.  Server/Proxy Architecture . . . . . . . . . . . . . . . .   6
    4.  ACV Protocol  . . . . . . . . . . . . . . . . . . . . . . . .   6
@@ -78,23 +78,22 @@ Table of Contents
    8.  Encoding  . . . . . . . . . . . . . . . . . . . . . . . . . .   8
    9.  Versioning  . . . . . . . . . . . . . . . . . . . . . . . . .   8
    10. Messaging . . . . . . . . . . . . . . . . . . . . . . . . . .   8
-     10.1.  Product Registration/Capabilities Exchange . . . . . . .   9
-     10.2.  KAT Exchange . . . . . . . . . . . . . . . . . . . . . .   9
-   11. Message Formats . . . . . . . . . . . . . . . . . . . . . . .   9
-     11.1.  Establish Connection HTTPS GET/200 OK  . . . . . . . . .  10
-     11.2.  Product Registration with Capabilities . . . . . . . . .  11
-     11.3.  Vector Set Download Request  . . . . . . . . . . . . . .  13
-     11.4.  Test Results Request . . . . . . . . . . . . . . . . . .  15
-     11.5.  Optional Flows . . . . . . . . . . . . . . . . . . . . .  16
-   12. Vector Set Expiration . . . . . . . . . . . . . . . . . . . .  17
-     12.1.  Resending test responses . . . . . . . . . . . . . . . .  18
-   13. Error Codes . . . . . . . . . . . . . . . . . . . . . . . . .  19
-   14. Other Considerations  . . . . . . . . . . . . . . . . . . . .  19
-   15. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  19
-   16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  19
-   17. Normative References  . . . . . . . . . . . . . . . . . . . .  19
-   Appendix A.  JSON Formatting Guidelines . . . . . . . . . . . . .  19
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  20
+     10.1.  Data Request/Capabilities Exchange . . . . . . . . . . .   8
+   11. Message Formats . . . . . . . . . . . . . . . . . . . . . . .   8
+     11.1.  Establish Connection HTTPS GET/200 OK  . . . . . . . . .   9
+     11.2.  Data Request with Capabilities . . . . . . . . . . . . .  10
+     11.3.  Vector Set Download Request  . . . . . . . . . . . . . .  12
+     11.4.  Test Results Request . . . . . . . . . . . . . . . . . .  14
+     11.5.  Optional Flows . . . . . . . . . . . . . . . . . . . . .  15
+   12. Vector Set Expiration . . . . . . . . . . . . . . . . . . . .  16
+     12.1.  Resending test responses . . . . . . . . . . . . . . . .  17
+   13. Error Codes . . . . . . . . . . . . . . . . . . . . . . . . .  18
+   14. Other Considerations  . . . . . . . . . . . . . . . . . . . .  18
+   15. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  18
+   16. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  18
+   17. Normative References  . . . . . . . . . . . . . . . . . . . .  18
+   Appendix A.  JSON Formatting Guidelines . . . . . . . . . . . . .  18
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction
 
@@ -106,6 +105,7 @@ Table of Contents
    cyptographic key generation on the client.  This document describes
    how EaaSP is structured with respect to the client-server model, the
    messaging protocol, optional features and flows.
+
 
 
 
@@ -122,45 +122,45 @@ Internet-Draft              Abbreviated Title              February 2017
 
 2.  Overview
 
-   ACVP has the following goals:
+   EaaSP has the following goals:
 
-   o  To work in situations where the testing system is remote from the
-      cryptographic module, e.g. running as a process on a separate
-      device.
+   o  To work in situations where the client system has limited true
+      random data available for key generation but is connected to a
+      network , such as many IoT devices, embedded devices. etc.
 
-   o  To enable automated testing that can take place with a minimum of
-      human interaction.
+   o  To enable generation of local cryptographic keys through
+      appropriate mixing of local and remote random data..
 
-   o  To enable the testing system to discover the capabilities of the
-      module being tested; that is, the particular algorithms and
-      parameters that the module supports.
+   o  To provide extensibility that can be used to introduce new
+      features to improve security and performance.
 
-   o  To provide extensibility that can be used to introduce tests for
-      new algorithms, and new tests for existing algorithms.
+   o  To provide a standard communication method so that network devices
+      can reliably obtain random data to strengthen the security of
+      cryptographic keys.
 
-   o  To be compatible with emerging automated validation systems
-      wherever possible, especially the FIPS-140 Cryptographic Algorithm
-      Validation Program.
+   EaaSP defines how to communicate a request to a remote server for
+   obtaining random data and how to communicate the corresponding
+   response (containing the requested data) back to client.  It defines
+   a transport (based on HTTP), an encoding and message format (which is
+   negotiated), and a set of message exchanges.  Each data item
+   corresponds to a single message exchange driven from the client .
+   EaaSP does not define key generation algorithms, nor does it detail
+   the precise conditions for a response to be acceptable.  Instead, it
+   references existing specifications for those algorithms, and defines
+   a mapping between the data on the wire and the algorithms that may
+   consume it.  EaaSP does not define detailed conformance criteria,
+   such as those in FIPS-140.  Instead, it aims to be independent of
+   particular conformance criteria, so that it can be used in multiple
+   domains with different (even potentially conflicting) conformance
+   criteria.  EaaSP does not define an interface that can be used to
+   manage or control a client.
 
-   o  To provide a standard communication method so that vendors can
-      utilize the same testing service for FIPS-140, 3rd party crypto
-      verification and product FCS readiness testing.
+2.1.  Audience
 
-   ACVP defines how to communicate a request (to execute a cryptographic
-   operation) to a cryptographic module, and how to communicate the
-   corresponding response (containing the output of that operation) back
-   to a testing system.  It defines a transport (based on HTTP or
-   HTTPS), an encoding and message format (which is negotiated), and a
-   set of message exchanges.  Each vector test set corresponds to a
-   single message exchange driven from the client associated with the
-   module under test.  ACVP does not define the cryptographic
-   algorithms, nor does it detail the precise conditions for a response
-   to be acceptable.  Instead, it references existing specifications for
-   those algorithms, and defines a mapping between the data on the wire
-   and the algorithm testing specification.  ACVP does not define
-   detailed conformance criteria, such as those in FIPS-140.  Instead,
-   it aims to be independent of particular conformance criteria, so that
-   it can be used in multiple domains with different (even potentially
+   This document is written to address multiple audiences:
+
+   o  Crypto module developers who need to provide assurance for
+      cryptographic key strength
 
 
 
@@ -169,13 +169,6 @@ Vassilev, et al.         Expires August 17, 2017                [Page 3]
 
 Internet-Draft              Abbreviated Title              February 2017
 
-
-   conflicting) conformance criteria.  ACVP does not define an interface
-   that can be used to manage or control a cryptographic module.
-
-2.1.  Audience
-
-   This document is written to address multiple audiences:
 
    o  Crypto module developers who require validation testing
 
@@ -194,9 +187,10 @@ Internet-Draft              Abbreviated Title              February 2017
 
    o  The API to the cryptographic module
 
-   o  How the KATs are generated
+   o  How the cryptographic keys are generated
 
-   o  How the results/artifacts are stored or managed
+   o  How the random data obtained through the protocol are stored or
+      managed
 
    o  Authentication used
 
@@ -204,17 +198,23 @@ Internet-Draft              Abbreviated Title              February 2017
 
    o  Management interface
 
-   With that in mind there are several expectations when building a
-   server used as a validation authority.  A validation authority shall
-   use HTTPS, TLS 1.2 or greater and mutual authentication.  Therefore a
-   client that expects to be used with a validation authority shall have
-   the same requirements.  A server, proxy or client developed for the
-   purposes of internal organizational testing only may chose not to
-   include some of those features.
+   With that in mind there are several expectations when building a EaaS
+   server used as a reputable source of randomness on the net.  TBD.
 
 2.3.  Terminology
 
    TBD
+
+3.  Architecture
+
+
+
+
+
+
+
+
+
 
 
 
@@ -225,8 +225,6 @@ Vassilev, et al.         Expires August 17, 2017                [Page 4]
 
 Internet-Draft              Abbreviated Title              February 2017
 
-
-3.  Architecture
 
                         Server/Client Architecture
 
@@ -273,6 +271,8 @@ Internet-Draft              Abbreviated Title              February 2017
       encrypt/decrypt, generate keys, signatures, perform varifications
       and DRBG functions.
 
+   o  Crpyographic Module API - This is the interface to the crypto
+      module from the ACV Client.  This interface is environment
 
 
 
@@ -282,8 +282,6 @@ Vassilev, et al.         Expires August 17, 2017                [Page 5]
 Internet-Draft              Abbreviated Title              February 2017
 
 
-   o  Crpyographic Module API - This is the interface to the crypto
-      module from the ACV Client.  This interface is environment
       specific and will vary depending on the API available on the
       crypto module.
 
@@ -329,6 +327,8 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
                                  Figure 3
+
+
 
 
 
@@ -396,20 +396,11 @@ Internet-Draft              Abbreviated Title              February 2017
 
 5.  Security
 
-   It is recommended that HTTPS is used in order to enforce a secure
-   communication method.  Not all environments will have TLS so HTTP
-   with some level of authentication may be the only option.
+   TBD
 
 6.  Authentication
 
-   It is recommended that an authentication scheme be used.  Depending
-   on the target environment that can be as weak as basic HTTP
-   authentication or as strong as TLS mutual certificate authentication.
-   Definition of an authentication scheme will not be discussed here,
-   but should be agreed upon between the client and server owning
-   entities including the servers owned by the validation authorities.
-   For the purposes of the message flow examples, no authentication will
-   be used.
+   TBD
 
 7.  Traceability
 
@@ -420,10 +411,10 @@ Internet-Draft              Abbreviated Title              February 2017
    The encoding used for the request/response messaging will be JSON.
    The data will be identified by: Content-type: application/json In
    order to allow environment specific extensions to a particular
-   version of the ACV protocol, a top-level JSON keyword, extensions
+   version of the EaaS protocol, a top-level JSON keyword, extensions
    will be used to extend the OE description and/or the capabilities.
-   Extensions may be ignored by the ACV server.  Vector and vector
-   response data will be JSON encoded.
+   Extensions may be ignored by the EaaS server.  All data will be JSON
+   encoded.
 
 9.  Versioning
 
@@ -438,8 +429,17 @@ Internet-Draft              Abbreviated Title              February 2017
 
 10.  Messaging
 
+10.1.  Data Request/Capabilities Exchange
 
+   TBD
 
+11.  Message Formats
+
+   Servers may require a contextual path in the URI prior to the service
+   section and clients/proxies must be able to support it.
+
+   Unique variable definitions to identify the vector set, device and
+   session include:
 
 
 
@@ -450,37 +450,6 @@ Vassilev, et al.         Expires August 17, 2017                [Page 8]
 Internet-Draft              Abbreviated Title              February 2017
 
 
-10.1.  Product Registration/Capabilities Exchange
-
-   The product registration message will include many of the normal
-   cryptographic algorithm identification line items that are found when
-   filling out a testing form.  This pre-test message will carry the
-   Company name, primary contact (OE information) as well as a detailed
-   list of the supported cryptographic algorithms to be tested during a
-   session.  The server will return the vector test list to the client.
-   It will consist of a list of vector set IDs (vsId) each of which
-   represent a set of test vectors which can be used to request the test
-   vectors at a later time.
-
-10.2.  KAT Exchange
-
-   The KAT exchange consists of the ACV client requesting a particular
-   set of vectors selected from the vector test list.  The server
-   responds with the test vectors.  Once the client has run the vectors
-   the response data will be returned to the server for processing.  The
-   client will repeat this process until all of the tests in the session
-   test list have been processed.  The client may request results from
-   the server at any time, however if test sets have not been completed
-   the overall status will be incomplete.
-
-11.  Message Formats
-
-   Servers may require a contextual path in the URI prior to the service
-   section and clients/proxies must be able to support it.
-
-   Unique variable definitions to identify the vector set, device and
-   session include:
-
    o  Session - represented by a JSON Web Token(JWT).  Within the JWT,
       the JWT ID(JTI) will be a unique identifier that will be generated
       by the server and can be used as a session ID.
@@ -490,21 +459,6 @@ Internet-Draft              Abbreviated Title              February 2017
       the client as part of the capabilities exchange.
 
    JWT example:
-
-
-
-
-
-
-
-
-
-
-
-Vassilev, et al.         Expires August 17, 2017                [Page 9]
-
-Internet-Draft              Abbreviated Title              February 2017
-
 
 {
 "alg" : "none"
@@ -547,17 +501,7 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-Vassilev, et al.         Expires August 17, 2017               [Page 10]
+Vassilev, et al.         Expires August 17, 2017                [Page 9]
 
 Internet-Draft              Abbreviated Title              February 2017
 
@@ -586,45 +530,20 @@ each message.
 
    The authentication mechanism will be defined by the server.
 
-11.2.  Product Registration with Capabilities
+11.2.  Data Request with Capabilities
 
-   POST the registration to the server consisting of the ACVP version,
-   Operating Environment (OE), vector encoding, capabilities and any
+   POST the registration to the server consisting of the EaaSP version,
+   Operating Environment (OE), encoding, capabilities and any
    extensions.  In addition there are a few parameters that specify
    session specific information:
 
-   o  certificateRequest - If an algorithm certificate is not desired
-      for this registration populate the field "certificateRequest" with
-      "no", otherwise "yes".
+   o  TBDparam1 - .
 
-   o  responseRequest - If this vector session is for the purposes of
-      testing the client or DUT prior to a certificate request and
-      desires the responses to the vectors as well, indicate with "yes",
-      otherwise omit the keyword or indicate with "no"
+   o  TBDparam2 -
 
-   o  production - If this is a production environment indicate so with
-      "yes", otherwise omit this keyword or indicate with "no".  A
-      production environment may not be able to support intermediate
-      value tests and therefore those tests will be excluded.
+   o  TBDparam3 -
 
-   o  encryptAtRest - The client may request the server to encrypt all
-      data at rest by registering "encryptAtRest" with "yes".  Omitting
-
-
-
-
-Vassilev, et al.         Expires August 17, 2017               [Page 11]
-
-Internet-Draft              Abbreviated Title              February 2017
-
-
-      the "encryptAtRest" field or registering with "no" will indicate
-      to the server that no encryption is require for the data at rest.
-
-   Note that when a certificate request is made production and
-   responseRequest shall be omitted or set to "no".  Conversely if no
-   certificate is requested, the operationalEnvironment section may be
-   omitted.
+   o  TBDparam4 -
 
 
    POST /validation/acvp/register HTTP1.1
@@ -635,6 +554,14 @@ Internet-Draft              Abbreviated Title              February 2017
    "operation" : "register",
    "acvVersion" : "0.2",
    "certificateRequest" : "yes",
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 10]
+
+Internet-Draft              Abbreviated Title              February 2017
+
+
    "responseRequest" : "no",
    "production" : "no",
    "encryptAtRest" : "yes",
@@ -666,14 +593,6 @@ Internet-Draft              Abbreviated Title              February 2017
                128,
                256
                 ],
-
-
-
-Vassilev, et al.         Expires August 17, 2017               [Page 12]
-
-Internet-Draft              Abbreviated Title              February 2017
-
-
    "tagLen" : [
                96
                   ],
@@ -691,6 +610,14 @@ Internet-Draft              Abbreviated Title              February 2017
                   ]
              }
           ]
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 11]
+
+Internet-Draft              Abbreviated Title              February 2017
+
+
       }
    }
 
@@ -722,14 +649,6 @@ Internet-Draft              Abbreviated Title              February 2017
    processed vector set, i.e. containing a result for every test case in
    the vector set.
 
-
-
-
-Vassilev, et al.         Expires August 17, 2017               [Page 13]
-
-Internet-Draft              Abbreviated Title              February 2017
-
-
    GET /validation/acvp/vectors?vsId=1437  HTTP1.1
    User Agent: acvp-client/0.2
    Host: www.my-acvpserver.com
@@ -739,6 +658,20 @@ Internet-Draft              Abbreviated Title              February 2017
 
    The server will respond with the vector set associated with the vsId
    for the client to process
+
+
+
+
+
+
+
+
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 12]
+
+Internet-Draft              Abbreviated Title              February 2017
 
 
    200 OK Response:
@@ -781,7 +714,18 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 14]
+
+
+
+
+
+
+
+
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 13]
 
 Internet-Draft              Abbreviated Title              February 2017
 
@@ -837,7 +781,7 @@ Content-Length: <length of results>
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 15]
+Vassilev, et al.         Expires August 17, 2017               [Page 14]
 
 Internet-Draft              Abbreviated Title              February 2017
 
@@ -893,7 +837,7 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 16]
+Vassilev, et al.         Expires August 17, 2017               [Page 15]
 
 Internet-Draft              Abbreviated Title              February 2017
 
@@ -949,7 +893,7 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 17]
+Vassilev, et al.         Expires August 17, 2017               [Page 16]
 
 Internet-Draft              Abbreviated Title              February 2017
 
@@ -1005,31 +949,26 @@ Internet-Draft              Abbreviated Title              February 2017
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 18]
+Vassilev, et al.         Expires August 17, 2017               [Page 17]
 
 Internet-Draft              Abbreviated Title              February 2017
 
 
 13.  Error Codes
 
-   Errors will follow HTTP[S] numbering scheme.  In addition errors as
-   well as 200 messages may carry JSON encoded information that
-   describes in detail the error and any associated troubleshooting
-   information.  A non-exhaustive list of JSON encoded error messages
-   are in Appendix 2.
+   Errors will follow HTTP numbering scheme.  In addition errors as well
+   as 200 messages may carry JSON encoded information that describes in
+   detail the error and any associated troubleshooting information.  A
+   non-exhaustive list of JSON encoded error messages are in Appendix 2.
 
 14.  Other Considerations
 
-   When an ACVP client is attached to a cryptographic module that is in
-   use, access to ACVP MUST be controlled so that only an administrator
-   or other authorized user can send and receive ACVP messages.  This is
-   because an attacker that has access to ACVP can potentially use it to
-   probe for weaknesses in the cryptographic module.
+   TBD
 
 15.  Acknowledgements
 
-   Original ACVP created by David McGrew, Bill Hudson and Anthony Grieco
-   of Cisco Systems.
+   Original EaaS concept and related prototype created by Apostol
+   Vassilev, NIST.
 
 16.  IANA Considerations
 
@@ -1054,23 +993,23 @@ Appendix A.  JSON Formatting Guidelines
    Keywords should be chosen such that they are informative and brief,
    for example:
 
-   { "acvVersion" : "0.2", "results" : { "disposition" : "incomplete", }
+   { "acvVersion" : "0.1", "results" : { "disposition" : "incomplete", }
 
    Metadata assigned to the keyword may use any format which best
    reflects the information being represented including hyphens,
-
-
-
-Vassilev, et al.         Expires August 17, 2017               [Page 19]
-
-Internet-Draft              Abbreviated Title              February 2017
-
-
    underscores alternating case, numbers, etc.  However, brevity should
    be a major consideration, for example:
 
    "algorithms" : [ { "algorithm" : "AES-GCM", "mode" : "modes", "ivGen"
    : "internal", "ivGenMode" : "8.2.1", } All metadata representing
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 18]
+
+Internet-Draft              Abbreviated Title              February 2017
+
+
    strings or big numbers shall use double quotes at both ends.  Big
    numbers require conversion from strings to whatever format is used by
    the DUT.  Numerical values of integer size or with decimal points may
@@ -1117,4 +1056,9 @@ Authors' Addresses
 
 
 
-Vassilev, et al.         Expires August 17, 2017               [Page 20]
+
+
+
+
+
+Vassilev, et al.         Expires August 17, 2017               [Page 19]
